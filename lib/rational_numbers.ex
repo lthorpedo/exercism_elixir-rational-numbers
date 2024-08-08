@@ -1,8 +1,6 @@
 defmodule RationalNumbers do
   @type rational :: {integer, integer}
 
-  import Math
-
   @doc """
   Add two rational numbers
   """
@@ -82,8 +80,8 @@ defmodule RationalNumbers do
   """
   @spec pow_real(x :: integer, n :: rational) :: float
   def pow_real(x, n) do
-    # root = 1 / elem(n,1)
-    :math.pow(x, elem(n,0)) |> Math.nth_root(elem(n,1))
+    root = 1 / elem(n,1)
+    :math.pow(x, elem(n,0)) |> :math.pow(root)
   end
 
   @doc """
@@ -93,7 +91,7 @@ defmodule RationalNumbers do
   def reduce(a) do
     a1 = elem(a,0)
     b1 = elem(a,1)
-    common_den = Math.gcd(a1,b1)
+    common_den = gcd(a1,b1)
     cond do
       a1 == 0 -> {0,1}
       common_den > 1 ->
@@ -105,6 +103,23 @@ defmodule RationalNumbers do
       a1 > 0 && b1 < 0 ->
         {a1 * -1, Kernel.abs(b1)}
       true -> {a1,b1}
+    end
+  end
+
+  defp gcd(one, two) do
+    small = Enum.min([Kernel.abs(one), Kernel.abs(two)])
+    if small > 1 do
+      Enum.map(1..small, fn n ->
+        rem1 = rem(one, n)
+        rem2 = rem(two, n)
+        if rem1 == 0 && rem2 == 0 do
+          n
+        else
+          1
+        end
+      end) |> Enum.max
+    else
+      1
     end
   end
 end
