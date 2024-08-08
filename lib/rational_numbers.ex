@@ -1,6 +1,8 @@
 defmodule RationalNumbers do
   @type rational :: {integer, integer}
 
+  import Math
+
   @doc """
   Add two rational numbers
   """
@@ -13,7 +15,7 @@ defmodule RationalNumbers do
     b2 = elem(r_two,1)
     one = (a1 * b2 + a2 * b1)
     two = b1 * b2
-    {one, two}
+    {one, two} |> reduce
   end
 
   @doc """
@@ -27,7 +29,7 @@ defmodule RationalNumbers do
     b2 = elem(r_two,1)
     one = (a1 * b2 - a2 * b1)
     two = b1 * b2
-    {one, two}
+    {one, two} |> reduce
   end
 
   @doc """
@@ -35,9 +37,9 @@ defmodule RationalNumbers do
   """
   @spec multiply(a :: rational, b :: rational) :: rational
   def multiply(a, b) do
-    r1 = a[0] * b[0]
-    r2 = a[1] * b[1]
-    {r1, r2}
+    r1 = elem(a,0) * elem(b,0)
+    r2 = elem(a,1) * elem(b,1)
+    {r1, r2} |> reduce
   end
 
   @doc """
@@ -45,9 +47,9 @@ defmodule RationalNumbers do
   """
   @spec divide_by(num :: rational, den :: rational) :: rational
   def divide_by(num, den) do
-    r1 = num[0] * den[1]
-    r2 = den[0] * num[1]
-    {r1, r2}
+    r1 = elem(num,0) * elem(den,1)
+    r2 = elem(den,0) * elem(num,1)
+    {r1, r2} |> reduce
   end
 
   @doc """
@@ -55,6 +57,7 @@ defmodule RationalNumbers do
   """
   @spec abs(a :: rational) :: rational
   def abs(a) do
+    {Kernel.abs(elem(a, 0)), Kernel.abs(elem(a, 1))} |> reduce
   end
 
   @doc """
@@ -62,6 +65,16 @@ defmodule RationalNumbers do
   """
   @spec pow_rational(a :: rational, n :: integer) :: rational
   def pow_rational(a, n) do
+    cond do
+      n >= 0 ->
+        r1 = elem(a,0) |> :math.pow(n) |> round
+        r2 = elem(a,1) |> :math.pow(n) |> round
+        {r1, r2} |> reduce
+      n <= 0 ->
+        r1 = elem(a,1) |> :math.pow(Kernel.abs(n)) |> round
+        r2 = elem(a,0) |> :math.pow(Kernel.abs(n)) |> round
+        {r1, r2} |> reduce
+    end
   end
 
   @doc """
@@ -69,6 +82,8 @@ defmodule RationalNumbers do
   """
   @spec pow_real(x :: integer, n :: rational) :: float
   def pow_real(x, n) do
+    # root = 1 / elem(n,1)
+    :math.pow(x, elem(n,0)) |> Math.nth_root(elem(n,1))
   end
 
   @doc """
@@ -76,5 +91,20 @@ defmodule RationalNumbers do
   """
   @spec reduce(a :: rational) :: rational
   def reduce(a) do
+    a1 = elem(a,0)
+    b1 = elem(a,1)
+    common_den = Math.gcd(a1,b1)
+    cond do
+      a1 == 0 -> {0,1}
+      common_den > 1 ->
+        r1 = a1 / common_den |> round
+        r2 = b1 / common_den |> round
+        {r1, r2} |> reduce
+      a1 < 0 && b1 < 0 ->
+        {Kernel.abs(a1), Kernel.abs(b1)}
+      a1 > 0 && b1 < 0 ->
+        {a1 * -1, Kernel.abs(b1)}
+      true -> {a1,b1}
+    end
   end
 end
