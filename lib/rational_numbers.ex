@@ -98,6 +98,7 @@ defmodule RationalNumbers do
         r1 = a1 / common_den |> round
         r2 = b1 / common_den |> round
         {r1, r2} |> reduce
+        # ^^ we reduce it again with the lower numbers in case we need to do take the absolute value of the numbers
       a1 < 0 && b1 < 0 ->
         {Kernel.abs(a1), Kernel.abs(b1)}
       a1 > 0 && b1 < 0 ->
